@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chord Intervals Quiz</title>
+<style>
+  :root{
+    --red:#ff2d55; --blue:#007aff; --yellow:#ffd60a; --ink:#0b0b0f; --bg:#0e0f12;
+    --ok:#23c552; --err:#ff3b30; --mute:#c9ccd6; --card:#14161c;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:white}
+  .wrap{
+    min-height:100%;
+    display:grid; grid-template-rows:auto auto 1fr auto; gap:12px; padding:16px;
+    background:
+      radial-gradient(60vw 60vw at 20% -10%, rgba(255,45,85,.35), transparent 60%),
+      radial-gradient(60vw 60vw at 120% 0%, rgba(0,122,255,.35), transparent 60%),
+      radial-gradient(80vw 70vw at 50% 110%, rgba(255,214,10,.25), transparent 60%);
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  h1{font-size:1.2rem; margin:0; letter-spacing:.3px}
+  .badge{font-size:.8rem; padding:.25rem .6rem; border-radius:999px; background:linear-gradient(90deg,var(--red),var(--blue))}
+  .panel{
+    background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:12px;
+    box-shadow:0 12px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .controls{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  }
+  button{
+    appearance:none; border:none; border-radius:14px; padding:12px 14px; font-weight:700; color:#0b0b0f;
+    background:#fff; cursor:pointer; transition:transform .05s ease, filter .15s ease, opacity .2s;
+  }
+  button:active{ transform: translateY(1px) scale(.99); }
+  .b-red{background:linear-gradient(180deg,#ff2d55,#ff375f); color:white}
+  .b-blue{background:linear-gradient(180deg,#0a84ff,#007aff); color:white}
+  .b-yellow{background:linear-gradient(180deg,#ffd60a,#ffcc00)}
+  .b-ghost{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.18)}
+  .b-ok{background:linear-gradient(180deg,#2bd96b,#22bb55); color:#06120a}
+  .b-err{background:linear-gradient(180deg,#ff4b4b,#ff2d2d); color:#fff}
+  .grid{
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;
+  }
+  @media (min-width:640px){ .grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  .choice{
+    padding:14px; border-radius:14px; text-align:center; font-weight:800;
+    border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.06);
+    color:white; box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .choice.primary-1{ background:linear-gradient(135deg, rgba(255,45,85,.22), rgba(255,255,255,.06)); }
+  .choice.primary-2{ background:linear-gradient(135deg, rgba(0,122,255,.22), rgba(255,255,255,.06)); }
+  .choice.primary-3{ background:linear-gradient(135deg, rgba(255,214,10,.22), rgba(255,255,255,.06)); color:#090b10 }
+  .choice.correct{ outline:3px solid var(--ok); }
+  .choice.wrong{ outline:3px solid var(--err); }
+  .flex{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .muted{color:var(--mute); font-size:.9rem}
+  .score{
+    display:flex; gap:8px; align-items:center; justify-content:center;
+    font-weight:800;
+  }
+  .score span{padding:.25rem .5rem; border-radius:10px; background:rgba(255,255,255,.08)}
+  details{
+    background:rgba(255,255,255,.06); border-radius:12px; padding:8px 10px; border:1px solid rgba(255,255,255,.08)
+  }
+  summary{cursor:pointer; font-weight:700}
+  .opt-list{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px}
+  .opt{display:flex; gap:8px; align-items:center; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px}
+  .pill{font-size:.7rem; background:rgba(255,255,255,.14); padding:2px 6px; border-radius:999px; margin-left:auto}
+  .footer{opacity:.85; font-size:.8rem; text-align:center}
+  .shake{ animation:shake .25s linear }
+  @keyframes shake{ 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+  .hidden{display:none}
+  .hint{font-size:.9rem}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎹 Chord Intervals Quiz</h1>
+    <div class="badge">Primary-color mode</div>
+  </header>
+
+  <!-- Transport & Score -->
+  <div class="panel">
+    <div class="flex">
+      <div class="controls">
+        <button id="btnStart" class="b-yellow">Tap to enable sound</button>
+        <button id="btnPlay" class="b-blue" disabled>Play chord</button>
+        <button id="btnArp" class="b-red" disabled>Arpeggiate</button>
+        <button id="btnNext" class="b-ghost" disabled>Next</button>
+      </div>
+    </div>
+    <div class="flex" style="margin-top:10px">
+      <div class="hint muted" id="hint">Hint: use Arpeggiate to hear the intervals.</div>
+      <div class="score" id="scoreBox">
+        <span>Score: <b id="score">0</b></span>
+        <span>Streak: <b id="streak">0</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Choices -->
+  <div class="panel">
+    <div id="msg" class="muted" style="margin-bottom:10px">Press “Tap to enable sound,” then “Play chord”.</div>
+    <div id="choices" class="grid"></div>
+  </div>
+
+  <!-- Options -->
+  <details class="panel">
+    <summary>Chord pool & settings</summary>
+    <div class="opt-list" id="opts"></div>
+    <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+      <label class="opt"><input type="checkbox" id="triadsOnly"> Triads only <span class="pill">filter</span></label>
+      <label class="opt"><input type="checkbox" id="limitRange" checked> Keep chords mid-range <span class="pill">ear training</span></label>
+      <label class="opt"><input type="checkbox" id="autoPlay" checked> Auto play on Next <span class="pill">flow</span></label>
+    </div>
+  </details>
+
+  <div class="footer muted">
+    Built with the Web Audio API. No samples, just pure waveforms for fast load. 🎧
+  </div>
+</div>
+
+<script>
+(() => {
+  // ----------------- Music utils -----------------
+  const NOTE = {
+    midiToFreq(n){ return 440 * Math.pow(2, (n - 69) / 12); },
+  };
+
+  // Chord definitions (intervals in semitones)
+  const CHORD_TYPES = [
+    {key:'maj',   label:'Major (1 3 5)',        iv:[0,4,7],         cat:'triad',   enabled:true},
+    {key:'min',   label:'Minor (1 b3 5)',       iv:[0,3,7],         cat:'triad',   enabled:true},
+    {key:'aug',   label:'Aug (1 3 #5)',         iv:[0,4,8],         cat:'triad',   enabled:true},
+    {key:'dim',   label:'Dim (1 b3 b5)',        iv:[0,3,6],         cat:'triad',   enabled:true},
+    {key:'sus2',  label:'Sus2 (1 2 5)',         iv:[0,2,7],         cat:'sus',     enabled:true},
+    {key:'sus4',  label:'Sus4 (1 4 5)',         iv:[0,5,7],         cat:'sus',     enabled:true},
+    {key:'dom7',  label:'Dom7 (1 3 5 b7)',      iv:[0,4,7,10],      cat:'7th',     enabled:true},
+    {key:'maj7',  label:'Maj7 (1 3 5 7)',       iv:[0,4,7,11],      cat:'7th',     enabled:true},
+    {key:'min7',  label:'Min7 (1 b3 5 b7)',     iv:[0,3,7,10],      cat:'7th',     enabled:true},
+    {key:'m7b5',  label:'m7♭5 (1 b3 b5 b7)',    iv:[0,3,6,10],      cat:'7th',     enabled:false},
+    {key:'dim7',  label:'Dim7 (1 b3 b5 bb7)',   iv:[0,3,6,9],       cat:'7th',     enabled:false},
+  ];
+
+  // ----------------- Audio engine -----------------
+  let ac = null, master = null, limiter = null;
+  function ensureAudio(){
+    if (ac) return;
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain();
+    master.gain.value = 0.8;
+
+    // Gentle limiter
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -24; comp.knee.value = 20; comp.ratio.value = 12; comp.attack.value = 0.003; comp.release.value = 0.25;
+    limiter = comp;
+    master.connect(comp).connect(ac.destination);
+  }
+
+  function playTone(freq, when, dur, {
+    type='triangle',
+    a=0.008, d=0.06, s=0.65, r=0.22, detune=0
+  }={}){
+    const osc = ac.createOscillator();
+    const g = ac.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, when);
+    if (detune) osc.detune.setValueAtTime(detune, when);
+
+    // Envelope
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(1.0, when + a);
+    g.gain.linearRampToValueAtTime(s, when + a + d);
+    // Release
+    g.gain.setTargetAtTime(0.0001, when + Math.max(0, dur - r), r * 0.6);
+
+    osc.connect(g).connect(master);
+    osc.start(when);
+    osc.stop(when + dur + 0.1);
+  }
+
+  function playChord(freqs, dur=1.25){
+    const t = ac.currentTime + 0.02;
+    freqs.forEach((f,i)=>{
+      playTone(f, t, dur, { detune:(i%2?+3:-3) });
+    });
+  }
+  function playArp(freqs, step=0.28, dur=0.22){
+    const t0 = ac.currentTime + 0.02;
+    freqs.forEach((f,i)=>{
+      playTone(f, t0 + i*step, dur, { detune: (i%2?+2:-2) });
+    });
+  }
+
+  // ----------------- Quiz state -----------------
+  const el = {
+    start:  document.getElementById('btnStart'),
+    play:   document.getElementById('btnPlay'),
+    arp:    document.getElementById('btnArp'),
+    next:   document.getElementById('btnNext'),
+    msg:    document.getElementById('msg'),
+    choices:document.getElementById('choices'),
+    opts:   document.getElementById('opts'),
+    score:  document.getElementById('score'),
+    streak: document.getElementById('streak'),
+    triadsOnly: document.getElementById('triadsOnly'),
+    limitRange: document.getElementById('limitRange'),
+    autoPlay: document.getElementById('autoPlay'),
+    hint:   document.getElementById('hint'),
+  };
+
+  let score=0, streak=0;
+  let current = null; // {rootMidi, typeKey, freqs, label}
+
+  function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function activeChordPool(){
+    const triadsOnly = el.triadsOnly.checked;
+    return CHORD_TYPES.filter(c => c.enabled && (!triadsOnly || c.cat==='triad' || c.cat==='sus'));
+  }
+
+  function buildChoices(){
+    const pool = activeChordPool();
+    el.choices.innerHTML = '';
+    // Shuffle for display order:
+    const shuffled = [...pool].sort(()=>Math.random()-0.5);
+    shuffled.forEach((c,idx)=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice primary-' + ((idx%3)+1);
+      btn.textContent = c.label;
+      btn.dataset.key = c.key;
+      btn.addEventListener('click', () => onGuess(c.key, btn));
+      el.choices.appendChild(btn);
+    });
+  }
+
+  function explainIntervals(iv){
+    return iv.map(semi=>{
+      switch(semi){
+        case 0:return '1';
+        case 1:return 'b2';
+        case 2:return '2';
+        case 3:return 'b3';
+        case 4:return '3';
+        case 5:return '4';
+        case 6:return 'b5';
+        case 7:return '5';
+        case 8:return '#5';
+        case 9:return '6';
+        case 10:return 'b7';
+        case 11:return '7';
+        default:return semi;
+      }
+    }).join(' ');
+  }
+
+  function safeRootFor(iv){
+    // Choose a root that keeps the highest chord tone in a comfortable register
+    // Base range C3..B4 (48..71)
+    let root = randInt(50, 64); // start mid
+    const maxSpan = Math.max(...iv);
+    if (el.limitRange.checked){
+      // Ensure top note not above ~E6 (88)
+      const top = root + maxSpan;
+      if (top > 84) root -= 12;
+      if (root < 45) root = 45;
+    }else{
+      root = randInt(40, 72);
+    }
+    return root;
+  }
+
+  function newRound(){
+    const pool = activeChordPool();
+    if (pool.length === 0){
+      el.msg.textContent = 'Enable at least one chord type in settings.';
+      return;
+    }
+    buildChoices();
+
+    const picked = pick(pool);
+    const root = safeRootFor(picked.iv);
+    const freqs = picked.iv.map(semi => NOTE.midiToFreq(root + semi));
+    current = { rootMidi:root, typeKey:picked.key, freqs, label:picked.label, iv:picked.iv };
+
+    // Reset UI states
+    [...document.querySelectorAll('.choice')].forEach(c=>{
+      c.classList.remove('correct','wrong','shake');
+      c.disabled = false;
+    });
+    el.next.disabled = false;
+    el.play.disabled = false;
+    el.arp.disabled = false;
+    el.msg.innerHTML = `Guess the chord quality. <span class="muted mono">Intervals: ${picked.iv.length} notes</span>`;
+    if (el.autoPlay.checked && ac && ac.state === 'running'){
+      playChord(current.freqs);
+    }
+  }
+
+  function onGuess(key, button){
+    if (!current) return;
+    const correct = key === current.typeKey;
+    if (correct){
+      button.classList.add('correct');
+      score += 1; streak += 1;
+      el.msg.innerHTML = `✅ Correct — <b>${current.label}</b> <span class="muted mono">(${explainIntervals(current.iv)})</span>`;
+      // Disable others
+      disableChoices();
+    }else{
+      button.classList.add('wrong','shake');
+      streak = 0;
+      const correctBtn = [...document.querySelectorAll('.choice')].find(b=>b.dataset.key===current.typeKey);
+      if (correctBtn) correctBtn.classList.add('correct');
+      el.msg.innerHTML = `❌ Not quite. Correct: <b>${current.label}</b> <span class="muted mono">(${explainIntervals(current.iv)})</span>`;
+      disableChoices();
+    }
+    updateScore();
+  }
+
+  function disableChoices(){
+    [...document.querySelectorAll('.choice')].forEach(b=> b.disabled = true);
+  }
+
+  function updateScore(){
+    el.score.textContent = score;
+    el.streak.textContent = streak;
+  }
+
+  // ----------------- Options UI -----------------
+  function renderOptions(){
+    el.opts.innerHTML = '';
+    CHORD_TYPES.forEach(ct=>{
+      const row = document.createElement('label');
+      row.className = 'opt';
+      row.innerHTML = `
+        <input type="checkbox" ${ct.enabled?'checked':''} data-key="${ct.key}"> 
+        ${ct.label}
+        <span class="pill">${ct.cat}</span>
+      `;
+      row.querySelector('input').addEventListener('change', (e)=>{
+        ct.enabled = e.target.checked;
+        buildChoices();
+      });
+      el.opts.appendChild(row);
+    });
+  }
+
+  // ----------------- Bindings -----------------
+  el.start.addEventListener('click', async()=>{
+    ensureAudio();
+    // Some platforms need resume
+    if (ac.state !== 'running'){
+      try { await ac.resume(); } catch(e){}
+    }
+    el.start.textContent = 'Sound ready';
+    el.start.disabled = true;
+    el.play.disabled = false;
+    el.arp.disabled = false;
+    el.next.disabled = false;
+    el.msg.textContent = 'Press Play chord to begin, or Next to get a new one.';
+    if (!current) newRound();
+  });
+
+  el.play.addEventListener('click', ()=>{
+    if (!ac) return;
+    if (!current) return;
+    playChord(current.freqs);
+  });
+
+  el.arp.addEventListener('click', ()=>{
+    if (!ac) return;
+    if (!current) return;
+    playArp(current.freqs);
+  });
+
+  el.next.addEventListener('click', ()=> newRound());
+  el.triadsOnly.addEventListener('change', ()=> { buildChoices(); newRound(); });
+
+  // Init
+  renderOptions();
+  buildChoices();
+})();
+</script>
+</body>
+</html>
