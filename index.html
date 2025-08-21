@@ -15,22 +15,18 @@
     min-height:100%;
     display:grid; grid-template-rows:auto auto 1fr auto; gap:12px; padding:16px;
     background:
-      radial-gradient(60vw 60vw at 20% -10%, rgba(255,45,85,.35), transparent 60%),
+      radial-gradient(60vw 60vw at 20% -10%, rgba(45,45,85,.35), transparent 60%),
       radial-gradient(60vw 60vw at 120% 0%, rgba(0,122,255,.35), transparent 60%),
       radial-gradient(80vw 70vw at 50% 110%, rgba(255,214,10,.25), transparent 60%);
   }
-  header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-  }
+  header{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
   h1{font-size:1.2rem; margin:0; letter-spacing:.3px}
   .badge{font-size:.8rem; padding:.25rem .6rem; border-radius:999px; background:linear-gradient(90deg,var(--red),var(--blue))}
   .panel{
     background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:12px;
     box-shadow:0 12px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
   }
-  .controls{
-    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
-  }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; }
   button{
     appearance:none; border:none; border-radius:14px; padding:12px 14px; font-weight:700; color:#0b0b0f;
     background:#fff; cursor:pointer; transition:transform .05s ease, filter .15s ease, opacity .2s;
@@ -42,9 +38,7 @@
   .b-ghost{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.18)}
   .b-ok{background:linear-gradient(180deg,#2bd96b,#22bb55); color:#06120a}
   .b-err{background:linear-gradient(180deg,#ff4b4b,#ff2d2d); color:#fff}
-  .grid{
-    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;
-  }
+  .grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
   @media (min-width:640px){ .grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
   .choice{
     padding:14px; border-radius:14px; text-align:center; font-weight:800;
@@ -53,19 +47,14 @@
   }
   .choice.primary-1{ background:linear-gradient(135deg, rgba(255,45,85,.22), rgba(255,255,255,.06)); }
   .choice.primary-2{ background:linear-gradient(135deg, rgba(0,122,255,.22), rgba(255,255,255,.06)); }
-  .choice.primary-3{ background:linear-gradient(135deg, rgba(255,214,10,.22), rgba(255,255,255,.06)); color:#ffffff }
+  .choice.primary-3{ background:linear-gradient(135deg, rgba(255,214,10,.22), rgba(255,255,255,.06)); color:white; }
   .choice.correct{ outline:3px solid var(--ok); }
   .choice.wrong{ outline:3px solid var(--err); }
   .flex{display:flex; align-items:center; justify-content:space-between; gap:10px}
   .muted{color:var(--mute); font-size:.9rem}
-  .score{
-    display:flex; gap:8px; align-items:center; justify-content:center;
-    font-weight:800;
-  }
+  .score{ display:flex; gap:8px; align-items:center; justify-content:center; font-weight:800; }
   .score span{padding:.25rem .5rem; border-radius:10px; background:rgba(255,255,255,.08)}
-  details{
-    background:rgba(255,255,255,.06); border-radius:12px; padding:8px 10px; border:1px solid rgba(255,255,255,.08)
-  }
+  details{ background:rgba(255,255,255,.06); border-radius:12px; padding:8px 10px; border:1px solid rgba(255,255,255,.08) }
   summary{cursor:pointer; font-weight:700}
   .opt-list{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px}
   .opt{display:flex; gap:8px; align-items:center; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px}
@@ -73,16 +62,22 @@
   .footer{opacity:.85; font-size:.8rem; text-align:center}
   .shake{ animation:shake .25s linear }
   @keyframes shake{ 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
-  .hidden{display:none}
   .hint{font-size:.9rem}
   .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  /* Timbre dropdown styling */
+  select#timbre{
+    background: #1c1c1c;
+    color: white; border:1px solid rgba(255,255,255,.2);
+    padding:10px 12px; border-radius:12px; font-weight:700;
+  }
+  label.small{font-size:.8rem; opacity:.85}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>🎹 Chord Intervals Quiz</h1>
-    <div class="badge">V1.0</div>
+    <div class="badge">V1.2</div>
   </header>
 
   <!-- Transport & Score -->
@@ -93,6 +88,17 @@
         <button id="btnPlay" class="b-blue" disabled>Play chord</button>
         <button id="btnArp" class="b-red" disabled>Arpeggiate</button>
         <button id="btnNext" class="b-ghost" disabled>Next</button>
+
+        <!-- Timbre selector -->
+        <label for="timbre" class="small">Timbre</label>
+        <select id="timbre" aria-label="Select timbre">
+          <option value="sine">Sine (pure)</option>
+          <option value="triangle" selected>Triangle (soft)</option>
+          <option value="square">Square (hollow)</option>
+          <option value="sawtooth">Saw (bright)</option>
+          <option value="organ">Organ (additive)</option>
+          <option value="epiano">E-piano (light FM)</option>
+        </select>
       </div>
     </div>
     <div class="flex" style="margin-top:10px">
@@ -122,16 +128,14 @@
   </details>
 
   <div class="footer muted">
-    Built by Alex Andraos © 2025.
+    Built by Alex Andraos © 2025
   </div>
 </div>
 
 <script>
 (() => {
   // ----------------- Music utils -----------------
-  const NOTE = {
-    midiToFreq(n){ return 440 * Math.pow(2, (n - 69) / 12); },
-  };
+  const NOTE = { midiToFreq(n){ return 440 * Math.pow(2, (n - 69) / 12); } };
 
   // Chord definitions (intervals in semitones)
   const CHORD_TYPES = [
@@ -156,29 +160,89 @@
     master = ac.createGain();
     master.gain.value = 0.8;
 
-    // Gentle limiter
     const comp = ac.createDynamicsCompressor();
     comp.threshold.value = -24; comp.knee.value = 20; comp.ratio.value = 12; comp.attack.value = 0.003; comp.release.value = 0.25;
     limiter = comp;
+
     master.connect(comp).connect(ac.destination);
+  }
+
+  // --- Timbre selection ---
+  let currentTimbre = 'triangle';
+
+  function playOrgan(freq, when, dur){
+    const partials = [
+      {mul:1, amp:1.00},
+      {mul:2, amp:0.35},
+      {mul:3, amp:0.22},
+      {mul:4, amp:0.12}
+    ];
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(1.0, when + 0.008);
+    g.gain.linearRampToValueAtTime(0.7, when + 0.08);
+    g.gain.setTargetAtTime(0.0001, when + Math.max(0, dur - 0.18), 0.12);
+
+    partials.forEach(p=>{
+      const o = ac.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq * p.mul, when);
+      const og = ac.createGain();
+      og.gain.setValueAtTime(p.amp, when);
+      o.connect(og).connect(g);
+      o.start(when);
+      o.stop(when + dur + 0.1);
+    });
+    g.connect(master);
+  }
+
+  function playEPiano(freq, when, dur){
+    const mod = ac.createOscillator();
+    const modGain = ac.createGain();
+    const car = ac.createOscillator();
+    const carGain = ac.createGain();
+
+    mod.type = 'sine';
+    mod.frequency.setValueAtTime(freq * 2, when);
+    modGain.gain.setValueAtTime(80, when);
+    modGain.gain.exponentialRampToValueAtTime(2, when + 0.12);
+
+    car.type = 'sine';
+    car.frequency.setValueAtTime(freq, when);
+
+    carGain.gain.setValueAtTime(0.0001, when);
+    carGain.gain.exponentialRampToValueAtTime(1.0, when + 0.005);
+    carGain.gain.linearRampToValueAtTime(0.5, when + 0.06);
+    carGain.gain.setTargetAtTime(0.0001, when + Math.max(0, dur - 0.12), 0.1);
+
+    mod.connect(modGain).connect(car.frequency);
+    car.connect(carGain).connect(master);
+
+    mod.start(when);
+    car.start(when);
+    mod.stop(when + dur + 0.2);
+    car.stop(when + dur + 0.2);
   }
 
   function playTone(freq, when, dur, {
     type='triangle',
     a=0.008, d=0.06, s=0.65, r=0.22, detune=0
   }={}){
+    if (currentTimbre === 'organ'){ playOrgan(freq, when, dur); return; }
+    if (currentTimbre === 'epiano'){ playEPiano(freq, when, dur); return; }
+
     const osc = ac.createOscillator();
     const g = ac.createGain();
 
-    osc.type = type;
+    const simpleTypes = ['sine','triangle','square','sawtooth'];
+    const oscType = simpleTypes.includes(currentTimbre) ? currentTimbre : type;
+    osc.type = oscType;
     osc.frequency.setValueAtTime(freq, when);
     if (detune) osc.detune.setValueAtTime(detune, when);
 
-    // Envelope
     g.gain.setValueAtTime(0.0001, when);
     g.gain.exponentialRampToValueAtTime(1.0, when + a);
     g.gain.linearRampToValueAtTime(s, when + a + d);
-    // Release
     g.gain.setTargetAtTime(0.0001, when + Math.max(0, dur - r), r * 0.6);
 
     osc.connect(g).connect(master);
@@ -188,15 +252,11 @@
 
   function playChord(freqs, dur=1.25){
     const t = ac.currentTime + 0.02;
-    freqs.forEach((f,i)=>{
-      playTone(f, t, dur, { detune:(i%2?+3:-3) });
-    });
+    freqs.forEach((f,i)=> playTone(f, t, dur, { detune:(i%2?+3:-3) }) );
   }
   function playArp(freqs, step=0.28, dur=0.22){
     const t0 = ac.currentTime + 0.02;
-    freqs.forEach((f,i)=>{
-      playTone(f, t0 + i*step, dur, { detune: (i%2?+2:-2) });
-    });
+    freqs.forEach((f,i)=> playTone(f, t0 + i*step, dur, { detune:(i%2?+2:-2) }) );
   }
 
   // ----------------- Quiz state -----------------
@@ -214,7 +274,10 @@
     limitRange: document.getElementById('limitRange'),
     autoPlay: document.getElementById('autoPlay'),
     hint:   document.getElementById('hint'),
+    timbre: document.getElementById('timbre'),
   };
+
+  el.timbre.addEventListener('change', () => currentTimbre = el.timbre.value);
 
   let score=0, streak=0;
   let current = null; // {rootMidi, typeKey, freqs, label}
@@ -230,7 +293,6 @@
   function buildChoices(){
     const pool = activeChordPool();
     el.choices.innerHTML = '';
-    // Shuffle for display order:
     const shuffled = [...pool].sort(()=>Math.random()-0.5);
     shuffled.forEach((c,idx)=>{
       const btn = document.createElement('button');
@@ -263,12 +325,9 @@
   }
 
   function safeRootFor(iv){
-    // Choose a root that keeps the highest chord tone in a comfortable register
-    // Base range C3..B4 (48..71)
-    let root = randInt(50, 64); // start mid
+    let root = randInt(50, 64);
     const maxSpan = Math.max(...iv);
     if (el.limitRange.checked){
-      // Ensure top note not above ~E6 (88)
       const top = root + maxSpan;
       if (top > 84) root -= 12;
       if (root < 45) root = 45;
@@ -291,7 +350,6 @@
     const freqs = picked.iv.map(semi => NOTE.midiToFreq(root + semi));
     current = { rootMidi:root, typeKey:picked.key, freqs, label:picked.label, iv:picked.iv };
 
-    // Reset UI states
     [...document.querySelectorAll('.choice')].forEach(c=>{
       c.classList.remove('correct','wrong','shake');
       c.disabled = false;
@@ -312,7 +370,6 @@
       button.classList.add('correct');
       score += 1; streak += 1;
       el.msg.innerHTML = `✅ Correct — <b>${current.label}</b> <span class="muted mono">(${explainIntervals(current.iv)})</span>`;
-      // Disable others
       disableChoices();
     }else{
       button.classList.add('wrong','shake');
@@ -356,7 +413,6 @@
   // ----------------- Bindings -----------------
   el.start.addEventListener('click', async()=>{
     ensureAudio();
-    // Some platforms need resume
     if (ac.state !== 'running'){
       try { await ac.resume(); } catch(e){}
     }
@@ -369,18 +425,8 @@
     if (!current) newRound();
   });
 
-  el.play.addEventListener('click', ()=>{
-    if (!ac) return;
-    if (!current) return;
-    playChord(current.freqs);
-  });
-
-  el.arp.addEventListener('click', ()=>{
-    if (!ac) return;
-    if (!current) return;
-    playArp(current.freqs);
-  });
-
+  el.play.addEventListener('click', ()=>{ if (ac && current) playChord(current.freqs); });
+  el.arp.addEventListener('click',  ()=>{ if (ac && current) playArp(current.freqs); });
   el.next.addEventListener('click', ()=> newRound());
   el.triadsOnly.addEventListener('change', ()=> { buildChoices(); newRound(); });
 
